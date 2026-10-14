@@ -41,18 +41,21 @@ class EBook(Book):
 # Хранит: имя, список взятых книг.
 # Умеет: брать книгу, возвращать книгу.
 class Reader:
-    def __init__(self, name, books):
-        self.__name = name
-        self.__books = []
+    def __init__(self, name, *books):
         
-        if isinstance(books, list):
-            self.__books = books
+        self.__name = name
+        self.__books = list(books)
+        
+    def __str__(self):
+        if self.__books:
+            books_str = ", ".join(self.__books) 
         else:
-            self.__books.append(books)
+            books_str = "нет"
+        return f"Имя: {self.__name}, Взятые книги: {books_str}"
 
     def add_books(self, books):
         if isinstance(books, list):
-            self.__books = books
+            self.__books.extend(books)
         else:
             self.__books.append(books)
 
@@ -66,15 +69,65 @@ class Reader:
                 j += 1
 
 
+# Хранит: список всех книг, список всех читателей.
+# Умеет: добавлять книгу, добавлять читателя, показывать все книги, показывать всех читателей.
 class Library:
     def __init__(self):
-        pass
+        self.__books = []
+        self.__readers = []
+
+
+    def add_books(self, books):
+        if isinstance(books, list):
+            self.__books.extend(books)
+        else:
+            self.__books.append(books)
+
+    def add_readers(self, readers):
+        if isinstance(readers, list):
+            self.__readers.extend(readers)
+        else:
+            self.__readers.append(readers)
+
+    def show_books(self):
+        print("Все книги:")
+        for x in self.__books:
+            print(x.get_all())
+
+    def show_readers(self):
+        print("Все читатели:")
+        for x in self.__readers:
+            print(x)
+
+
 
 
 def main():
-    Mr = EBook("Взлетай", "Гоголь", 2026, 567)
-    Mr.change_status()
-    print(Mr.get_all())
+    lib = Library()
+
+    # Создаём книги
+    book1 = Book("Война и мир", "Толстой", 1869)
+    book2 = Book("Преступление и наказание", "Достоевский", 1866)
+    book3 = EBook("Python для всех", "Лутц", 2020, 15)
+
+    # Создаём читателей
+    reader1 = Reader("Tom")
+    reader2 = Reader("Bob", "Война и мир", "Python для всех")
+
+    # Добавляем в библиотеку
+    lib.add_books(book1)
+    lib.add_books(book2)
+    lib.add_books(book3)
+
+    lib.add_readers(reader1)
+    lib.add_readers(reader2)
+
+    # Показываем
+    print("=== Книги ===")
+    lib.show_books()
+
+    print("\n=== Читатели ===")
+    lib.show_readers()
 
 if __name__ == '__main__':
     main()
