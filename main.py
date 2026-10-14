@@ -39,7 +39,7 @@ class EBook(Book):
 
 
 # Хранит: имя, список взятых книг.
-# Умеет: брать книгу, возвращать книгу.
+# Умеет: возвращать строковое представление.
 class Reader:
     def __init__(self, name, *books):
         
@@ -53,42 +53,55 @@ class Reader:
             books_str = "нет"
         return f"Имя: {self.__name}, Взятые книги: {books_str}"
 
-    def add_books(self, books):
-        if isinstance(books, list):
-            self.__books.extend(books)
-        else:
-            self.__books.append(books)
+    def add_book(self, book):
+        self.__books.append(book)
 
-    def del_books(self, books):
-        for i in range(len(books)):
-            j = 0
-            while j < len(self.__books):
-                if books[i] == self.__books[j]:
-                    self.__books.pop(j)
-                    break
-                j += 1
+    def remove_book(self, book):
+        if book in self.__books:
+            self.__books.remove(book)
+
+    def get_name(self):
+        return self.__name
+    def get_books(self):
+        return self.__books
 
 
 # Хранит: список всех книг, список всех читателей.
 # Умеет: добавлять книгу, добавлять читателя, показывать все книги, показывать всех читателей.
+# Умеет: Работать со списками книг и читателей
 class Library:
     def __init__(self):
         self.__books = []
         self.__readers = []
 
 
-    def add_books(self, books):
-        if isinstance(books, list):
-            self.__books.extend(books)
-        else:
-            self.__books.append(books)
+    def add_books(self, *books):
+        self.__books.extend(books)
 
-    def add_readers(self, readers):
-        if isinstance(readers, list):
+
+    def add_readers(self, *readers):
             self.__readers.extend(readers)
-        else:
-            self.__readers.append(readers)
 
+
+    def take_book(self, reader, book):
+        # проверка: книга свободна?
+        if book.get_status():
+            print("Книга занята")
+            return
+        reader.add_book(book.get_name())
+        book.change_status()
+
+    def return_book(self, reader, book):
+        stbook = book.get_name()
+        rtbook = reader.get_books()
+        if stbook in rtbook:
+            reader.remove_book(stbook)
+            book.change_status()                
+            print("Книга успешно возвращена!")
+            return
+        print("Книга не найдена в базе читателя!")
+        return
+        
     def show_books(self):
         print("Все книги:")
         for x in self.__books:
@@ -112,16 +125,41 @@ def main():
 
     # Создаём читателей
     reader1 = Reader("Tom")
-    reader2 = Reader("Bob", "Война и мир", "Python для всех")
+    reader2 = Reader("Bob")
 
     # Добавляем в библиотеку
-    lib.add_books(book1)
-    lib.add_books(book2)
-    lib.add_books(book3)
+    lib.add_books(book1, book2, book3)
+    lib.add_readers(reader1, reader2)
 
-    lib.add_readers(reader1)
-    lib.add_readers(reader2)
+    print("=== Начальное состояние ===")
+    lib.show_books()
+    lib.show_readers()
 
+    print("\n=== Tom берёт 'Война и мир' ===")
+    lib.take_book(reader1, book1)
+    lib.show_books()
+    lib.show_readers()
+
+    print("\n=== Tom пытается взять ту же книгу снова ===")
+    lib.take_book(reader1, book1)   # должна быть ошибка
+    lib.show_books()
+    lib.show_readers()
+
+    print("\n=== Tom возвращает 'Война и мир' ===")
+    lib.return_book(reader1, book1)
+    lib.show_books()
+    lib.show_readers()
+
+    print("\n=== Bob пытается вернуть 'Война и мир', которую не брал ===")
+    lib.return_book(reader2, book1)   # должна быть ошибка
+    lib.show_books()
+    lib.show_readers()
+
+    print("\n=== Tom берёт 'Python для всех' ===")
+    lib.take_book(reader1, book3)
+    lib.show_books()
+    lib.show_readers()
+   
     # Показываем
     print("=== Книги ===")
     lib.show_books()
